@@ -34,6 +34,9 @@ import java.util.function.UnaryOperator;
  * Fast list without range checking.
  *
  * @author Brett Wooldridge
+ *
+ * note by river
+ * 非线程安全，对标 ArrayList
  */
 @SuppressWarnings("NullableProblems")
 public final class FastList<T> implements List<T>, RandomAccess, Serializable

@@ -68,6 +68,10 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
    private final AtomicInteger waiters;
    private volatile boolean closed;
 
+   /**
+    * note by river
+    * 这个命名也很棒，接力队列。一个线程操作完 entry 后放回去，另一个线程接着干
+    */
    private final SynchronousQueue<T> handoffQueue;
 
    public interface IConcurrentBagEntry
@@ -84,6 +88,10 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
 
    public interface IBagStateListener
    {
+      /**
+       * note by river
+       * 这个命名不太好，叫 xx 待处理更好
+       */
       void addBagItem(int waiting);
    }
 
@@ -148,6 +156,11 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
          timeout = timeUnit.toNanos(timeout);
          do {
             final var start = currentTime();
+            /**
+             * note by river
+             * 用 SynchronousQueue 同步比一直循环 sharedList 高效
+             * 一种是即时通知，一种是一直轮询
+             */
             final T bagEntry = handoffQueue.poll(timeout, NANOSECONDS);
             if (bagEntry == null || bagEntry.compareAndSet(STATE_NOT_IN_USE, STATE_IN_USE)) {
                return bagEntry;
@@ -208,6 +221,10 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
 
       sharedList.add(bagEntry);
 
+      /*
+       * note by river
+       * 为什么要有这个？如果没有这个，borrow 那里可能永远拿不到
+       */
       // spin until a thread takes it or none are waiting
       while (waiters.get() > 0 && bagEntry.getState() == STATE_NOT_IN_USE && !handoffQueue.offer(bagEntry)) {
          Thread.yield();

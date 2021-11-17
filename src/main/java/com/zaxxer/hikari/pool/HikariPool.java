@@ -597,6 +597,9 @@ public final class HikariPool extends PoolBase implements HikariPoolMXBean, IBag
    }
 
    /**
+    * note by river
+    * 和 closeConnection 的区别是：closeConnection 直接关闭连接，soft 先标记，满足条件才 close
+    *
     * "Soft" evict a Connection (/PoolEntry) from the pool.  If this method is being called by the user directly
     * through {@link com.zaxxer.hikari.HikariDataSource#evictConnection(Connection)} then {@code owner} is {@code true}.
     *
@@ -767,6 +770,9 @@ public final class HikariPool extends PoolBase implements HikariPoolMXBean, IBag
    }
 
    /**
+    * note by river
+    * 这个命名很贴切，打扫屋子里多余的连接
+    *
     * The house keeping task to retire and maintain minimum idle connections.
     */
    private final class HouseKeeper implements Runnable
